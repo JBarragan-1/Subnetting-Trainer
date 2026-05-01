@@ -123,7 +123,6 @@ A 5-step spotlight tour runs automatically on first load, walking through the ti
 
 - `subnetting-trainer.html` — the trainer (open this)
 - `README.md` — this file
-- `teams-post.md` — announcement post for Microsoft Teams
 
 ## License
 
