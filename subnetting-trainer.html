@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Subnetting Trainer</title>
+<style>
+  :root {
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
+    --color-text-primary: #1a1a1a;
+    --color-text-secondary: #5f5e5a;
+    --color-text-tertiary: #8a8983;
+    --color-background-primary: #ffffff;
+    --color-background-secondary: #f5f4ee;
+    --color-border-secondary: #c7c5bb;
+    --color-border-tertiary: #e0ddd2;
+    --border-radius-md: 6px;
+    --border-radius-lg: 10px;
+  }
+  * { box-sizing: border-box; }
+  body { font-family: var(--font-sans); background: #faf9f4; color: var(--color-text-primary); margin: 0; padding: 16px; max-width: 1400px; margin: 0 auto; }
+  .st-app{position:relative}
+  .st-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;gap:12px;flex-wrap:wrap}
+  .st-title{font-size:24px;font-weight:500;margin:0}
+  .st-sub{font-size:13px;color:var(--color-text-secondary);margin:2px 0 0}
+  .st-hud{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .st-pill{font-size:12px;padding:4px 10px;border-radius:999px;border:1px solid var(--color-border-tertiary);background:var(--color-background-secondary);display:inline-flex;align-items:center;gap:6px}
+  .st-pill b{font-weight:500}
+  .st-pill.tier-vet{background:#FAEEDA;color:#633806;border-color:#E9A13B}
+  .st-pill.tier-exp{background:#FBEAF0;color:#72243E;border-color:#D45285}
+  .st-pill.tier-night{background:#1F1B45;color:#fff;border-color:#534AB7}
+  .help-btn{padding:4px 10px;border-radius:999px;border:1px solid var(--color-border-tertiary);background:transparent;cursor:pointer;font-size:12px;color:var(--color-text-secondary)}
+  .st-card{background:var(--color-background-primary);border:1px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:14px 16px}
+  .st-mission{background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:16px 18px;border:1px solid var(--color-border-tertiary)}
+  .st-mission h3{font-size:16px;font-weight:500;margin:0 0 6px}
+  .st-tabs{display:flex;gap:6px;margin-bottom:1rem;flex-wrap:wrap}
+  .st-tab{font-size:13px;padding:6px 12px;border-radius:999px;border:1px solid var(--color-border-tertiary);background:transparent;cursor:pointer;color:var(--color-text-secondary)}
+  .st-tab.active{background:#185FA5;color:#fff;border-color:#185FA5}
+  .st-tab.locked{opacity:.45;cursor:not-allowed}
+  .st-tab.boss{color:#A32D2D;border-color:#E24B4A}
+  .st-tab.boss.active{background:#A32D2D;color:#fff}
+  .st-tab.sandbox{color:#085041;border-color:#1D9E75}
+  .st-tab.sandbox.active{background:#1D9E75;color:#fff}
+  .st-tab.challenge{color:#BA7517;border-color:#E9A13B}
+  .st-tab.challenge.active{background:#BA7517;color:#fff}
+  .st-tab.topo{color:#534AB7;border-color:#AFA9EC}
+  .st-tab.topo.active{background:#534AB7;color:#fff}
+  .st-tab.ach{color:#D45285;border-color:#F4C0D1}
+  .st-tab.ach.active{background:#D45285;color:#fff}
+  .st-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .st-mono{font-family:var(--font-mono)}
+  .st-input{padding:8px 10px;border:1px solid var(--color-border-secondary);border-radius:var(--border-radius-md);font-family:var(--font-mono);font-size:14px;background:var(--color-background-primary);color:var(--color-text-primary);width:180px}
+  .st-btn{padding:8px 14px;border:1px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:transparent;cursor:pointer;font-size:13px;color:var(--color-text-primary)}
+  .st-btn.primary{background:#185FA5;color:#fff;border-color:#185FA5}
+  .st-btn.boss{background:#A32D2D;color:#fff;border-color:#A32D2D}
+  .st-btn.lesson{background:#534AB7;color:#fff;border-color:#534AB7}
+  .st-btn.challenge{background:#BA7517;color:#fff;border-color:#BA7517}
+  .st-btn.challenge.exp{background:#D45285;border-color:#D45285}
+  .st-btn.challenge.night{background:#1F1B45;border-color:#534AB7}
+  .st-btn:disabled{opacity:.45;cursor:not-allowed}
+  .st-mc{display:grid;gap:8px;margin-top:10px}
+  .st-mc button{text-align:left;padding:10px 12px;border:1px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);background:var(--color-background-primary);cursor:pointer;font-size:14px;color:var(--color-text-primary)}
+  .st-mc button.correct{background:#EAF3DE;border-color:#639922;color:#173404}
+  .st-mc button.wrong{background:#FCEBEB;border-color:#E24B4A;color:#501313}
+  .st-feedback{margin-top:10px;padding:10px 12px;border-radius:var(--border-radius-md);font-size:13px;display:none}
+  .st-feedback.ok{background:#EAF3DE;color:#173404;display:block}
+  .st-feedback.bad{background:#FCEBEB;color:#501313;display:block}
+  .st-progress{height:8px;background:var(--color-background-secondary);border-radius:999px;overflow:hidden;margin:8px 0 12px}
+  .st-progress>div{height:100%;background:#1D9E75;transition:width .3s}
+  .st-timer{font-family:var(--font-mono);font-size:14px;font-weight:500}
+  .st-timer.warn{color:#BA7517}
+  .st-timer.crit{color:#A32D2D}
+  .st-dz{background:var(--color-background-primary);border:1px dashed var(--color-border-secondary);border-radius:var(--border-radius-md);padding:10px;min-height:50px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+  .st-chip{padding:6px 10px;border-radius:var(--border-radius-md);border:1px solid var(--color-border-secondary);background:var(--color-background-primary);cursor:grab;font-family:var(--font-mono);font-size:13px}
+  .st-chip.placed{background:#E1F5EE;border-color:#1D9E75;color:#085041}
+  .st-pair{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:6px 0}
+  .st-pair>div:first-child{padding:8px 10px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);font-size:13px;display:flex;align-items:center}
+  .study-section{margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--color-border-tertiary)}
+  .study-section:last-child{border-bottom:0}
+  .study-section h4{margin:0 0 6px;font-size:14px;font-weight:500}
+  .study-section p{margin:0 0 6px;font-size:14px;line-height:1.6;color:var(--color-text-secondary)}
+  .study-section .ex{background:var(--color-background-secondary);padding:8px 10px;border-radius:var(--border-radius-md);font-family:var(--font-mono);font-size:13px;margin:6px 0}
+  .stage-tabs{display:flex;gap:4px;margin-bottom:12px;padding:4px;background:var(--color-background-secondary);border-radius:999px;width:fit-content}
+  .stage-tab{padding:6px 14px;border-radius:999px;border:none;background:transparent;cursor:pointer;font-size:13px;color:var(--color-text-secondary)}
+  .stage-tab.active{background:var(--color-background-primary);color:var(--color-text-primary);font-weight:500}
+  .stage-tab.locked{opacity:.5;cursor:not-allowed}
+  .lesson-card{background:#EEEDFE;border:1px solid #AFA9EC;border-radius:var(--border-radius-lg);padding:16px 18px}
+  .lesson-card h3{margin:0 0 4px;font-size:16px;font-weight:500;color:#26215C}
+  .lesson-card .subt{margin:0 0 12px;font-size:13px;color:#3C3489}
+  .bit-grid{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:12px 0}
+  .bit-cell{width:42px;text-align:center;cursor:pointer}
+  .bit-cell .v{font-size:11px;color:var(--color-text-secondary);margin-bottom:2px;font-family:var(--font-mono)}
+  .bit-cell .b{width:42px;height:42px;border-radius:var(--border-radius-md);border:1px solid var(--color-border-secondary);background:var(--color-background-primary);display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:18px;font-weight:500}
+  .bit-cell .b.on{background:#185FA5;color:#fff;border-color:#185FA5}
+  .target-display{text-align:center;margin:8px 0;font-size:24px;font-family:var(--font-mono);font-weight:500}
+  .target-display.good{color:#1D9E75}
+  .live-readout{text-align:center;margin:8px 0;padding:8px;background:var(--color-background-primary);border-radius:var(--border-radius-md)}
+  .live-readout .v{font-size:20px;font-family:var(--font-mono);font-weight:500}
+  .mask-builder{display:flex;gap:2px;margin:12px 0;flex-wrap:nowrap;overflow-x:auto}
+  .mb-bit{width:18px;height:24px;border:1px solid var(--color-border-secondary);background:var(--color-background-primary);cursor:pointer;font-family:var(--font-mono);font-size:11px;padding:0;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .mb-bit.on{background:#185FA5;color:#fff;border-color:#185FA5}
+  .mb-dot{width:6px;display:flex;align-items:center;justify-content:center;color:var(--color-text-tertiary)}
+  .stepper{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:12px 0}
+  .step-card{background:var(--color-background-primary);padding:12px;border-radius:var(--border-radius-md);border:1px solid var(--color-border-tertiary)}
+  .step-card .l{font-size:11px;color:var(--color-text-secondary);margin-bottom:4px}
+  .step-card .v{font-family:var(--font-mono);font-size:14px}
+  .vlsm-req{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--color-background-primary);border-radius:var(--border-radius-md);margin:6px 0;border:1px solid var(--color-border-tertiary)}
+  .vlsm-req.placed{background:#E1F5EE;border-color:#1D9E75}
+  .vlsm-req .name{font-weight:500}
+  .vlsm-req .meta{font-size:12px;color:var(--color-text-secondary);font-family:var(--font-mono)}
+  .vlsm-slots{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:10px 0}
+  .vlsm-slot{padding:8px;background:var(--color-background-primary);border:1px dashed var(--color-border-secondary);border-radius:var(--border-radius-md);text-align:center;font-family:var(--font-mono);font-size:12px;cursor:pointer}
+  .vlsm-slot.taken{background:#E1F5EE;border-style:solid;border-color:#1D9E75;color:#085041}
+  .ch-tier-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:14px}
+  .ch-tier-card{padding:16px;border-radius:var(--border-radius-lg);border:1px solid;cursor:pointer}
+  .ch-tier-card.vet{background:#FAEEDA;border-color:#E9A13B}
+  .ch-tier-card.exp{background:#FBEAF0;border-color:#D45285}
+  .ch-tier-card.night{background:#1F1B45;border-color:#534AB7;color:#fff}
+  .ch-tier-card .name{font-size:18px;font-weight:500;margin-bottom:6px}
+  .ch-tier-card .meta{font-size:12px;opacity:.8}
+  .ch-tier-card .stats{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px;font-size:11px}
+  .ch-tier-card .stats div{background:rgba(255,255,255,.4);padding:4px 6px;border-radius:4px}
+  .ch-tier-card.night .stats div{background:rgba(255,255,255,.1)}
+  .boss-banner{background:#501313;color:#fff;padding:14px 18px;border-radius:var(--border-radius-lg);margin-bottom:12px}
+  .boss-banner h3{margin:0 0 4px;color:#fff;font-size:18px}
+  .boss-banner p{margin:0;font-size:13px;color:#F7C1C1}
+  .hp-bars{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:10px 0 14px}
+  .hp-bar{background:var(--color-background-primary);padding:10px 12px;border-radius:var(--border-radius-md);border:1px solid var(--color-border-tertiary)}
+  .hp-bar .lab{font-size:12px;color:var(--color-text-secondary);margin-bottom:6px;display:flex;justify-content:space-between}
+  .hp-bar .track{height:6px;background:var(--color-background-secondary);border-radius:999px;overflow:hidden}
+  .hp-bar .fill{height:100%;background:#A32D2D;transition:width .4s}
+  .hp-bar.done .fill{background:#1D9E75}
+  .sb-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .sb-stat{background:var(--color-background-primary);padding:10px 12px;border-radius:var(--border-radius-md);border:1px solid var(--color-border-tertiary)}
+  .sb-stat .lab{font-size:12px;color:var(--color-text-secondary);margin-bottom:4px}
+  .sb-stat .val{font-family:var(--font-mono);font-size:14px}
+  .bin-row{display:flex;gap:4px;flex-wrap:wrap;font-family:var(--font-mono);font-size:12px;margin:6px 0}
+  .bin-octet{display:flex}
+  .bin-bit{padding:3px 5px}
+  .bin-bit.net{background:#185FA5;color:#fff}
+  .bin-bit.host{background:#F1EFE8}
+  .bin-dot{padding:3px 2px;color:var(--color-text-tertiary)}
+  .topo-layout{display:grid;grid-template-columns:200px 1fr 260px;gap:12px;margin-top:8px}
+  .topo-panel{background:var(--color-background-primary);border:1px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:12px;max-height:560px;overflow-y:auto}
+  .topo-panel h4{font-size:13px;margin:0 0 8px;font-weight:500}
+  .topo-tool{padding:8px 10px;margin-bottom:6px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);cursor:pointer;font-size:13px;display:flex;align-items:center;gap:8px;border:1px solid transparent}
+  .topo-tool.active{background:#E6F1FB;border-color:#185FA5}
+  .topo-canvas-wrap{background:#F8F7F1;border:1px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);position:relative;overflow:hidden;height:560px}
+  .topo-canvas{width:100%;height:100%;position:relative}
+  .topo-device{position:absolute;transform:translate(-50%,-50%);cursor:move;text-align:center;z-index:2}
+  .topo-device .icon{width:54px;height:54px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px;background:#fff;border:1.5px solid var(--color-border-secondary);margin:0 auto}
+  .topo-device.router .icon{background:#FCEBEB;border-color:#E24B4A}
+  .topo-device.switch .icon{background:#E6F1FB;border-color:#185FA5}
+  .topo-device.host .icon{background:#EAF3DE;border-color:#639922}
+  .topo-device .name{font-size:11px;font-family:var(--font-mono);margin-top:2px;padding:1px 6px;background:rgba(255,255,255,.85);border-radius:4px;display:inline-block}
+  .topo-device.selected .icon{box-shadow:0 0 0 3px #534AB7}
+  .topo-device.linking .icon{box-shadow:0 0 0 3px #BA7517}
+  .topo-canvas svg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1}
+  .topo-canvas svg .lk{stroke:#5F5E5A;stroke-width:2;fill:none}
+  .topo-canvas svg .lk.assigned{stroke:#1D9E75;stroke-width:2.5}
+  .topo-canvas svg .lk.warn{stroke:#BA7517;stroke-dasharray:5,3}
+  .topo-canvas svg .lk-hit{stroke:transparent;stroke-width:14;fill:none;pointer-events:stroke;cursor:pointer}
+  .topo-canvas svg text{font-family:var(--font-mono);font-size:11px;fill:var(--color-text-primary);paint-order:stroke;stroke:#F8F7F1;stroke-width:3}
+  .topo-stats{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+  .topo-stat{background:var(--color-background-secondary);padding:6px 8px;border-radius:var(--border-radius-md);font-size:11px}
+  .topo-stat .v{font-family:var(--font-mono);font-size:13px;font-weight:500}
+  .topo-input{padding:6px 8px;border:1px solid var(--color-border-secondary);border-radius:var(--border-radius-md);font-family:var(--font-mono);font-size:12px;width:100%;box-sizing:border-box;background:var(--color-background-primary)}
+  .topo-subnet{padding:8px 10px;margin-bottom:6px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);font-size:12px;border:1px solid var(--color-border-tertiary)}
+  .topo-subnet .net{font-family:var(--font-mono);font-weight:500}
+  .topo-subnet .det{font-size:11px;color:var(--color-text-secondary);margin-top:2px}
+  .topo-validate{margin-top:8px;padding:8px 10px;border-radius:var(--border-radius-md);font-size:12px}
+  .topo-validate.ok{background:#EAF3DE;color:#173404}
+  .topo-validate.bad{background:#FBF1DE;color:#874C0A}
+  @media (max-width:900px){.topo-layout{grid-template-columns:1fr}.topo-canvas-wrap{height:400px}}
+  .ach-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+  .ach-card{padding:14px;border-radius:var(--border-radius-lg);border:1px solid}
+  .ach-card.unlocked{background:#EAF3DE;border-color:#97C459}
+  .ach-card.locked{background:var(--color-background-secondary);border-color:var(--color-border-tertiary);opacity:.65}
+  .ach-card .ico{font-size:28px;margin-bottom:6px}
+  .ach-card.locked .ico{filter:grayscale(1)}
+  .ach-card .name{font-weight:500;font-size:14px;margin-bottom:2px}
+  .ach-card .desc{font-size:11px;color:var(--color-text-secondary);margin-bottom:6px;line-height:1.4}
+  .ach-card .reward{font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(255,255,255,.6);display:inline-block;font-family:var(--font-mono)}
+  .ach-card.unlocked .reward{background:#C0DD97;color:#173404}
+  .ach-section-title{font-size:14px;font-weight:500;margin:14px 0 8px;padding:6px 10px;background:var(--color-background-secondary);border-radius:var(--border-radius-md)}
+  .ach-progress{margin-bottom:14px;padding:12px;background:var(--color-background-primary);border-radius:var(--border-radius-md);border:1px solid var(--color-border-tertiary)}
+  .ach-progress .lab{font-size:13px;margin-bottom:6px;font-weight:500}
+  .ach-progress .bar{height:10px;background:var(--color-background-secondary);border-radius:999px;overflow:hidden}
+  .ach-progress .bar>div{height:100%;background:linear-gradient(90deg,#D45285,#BA7517,#1D9E75);transition:width .4s}
+  .toast{position:fixed;bottom:24px;right:24px;z-index:1000;background:#FFF;border:1px solid #1D9E75;border-radius:var(--border-radius-lg);padding:12px 16px;box-shadow:0 8px 24px rgba(0,0,0,.15);display:flex;align-items:center;gap:10px;min-width:240px;animation:slideIn .3s ease-out}
+  .toast .ico{font-size:28px}
+  .toast .body .t{font-size:11px;color:#085041;text-transform:uppercase;letter-spacing:.05em;font-weight:500}
+  .toast .body .n{font-size:14px;font-weight:500;color:#173404}
+  .toast .body .r{font-size:11px;color:var(--color-text-secondary)}
+  @keyframes slideIn{from{transform:translateX(120%);opacity:0}to{transform:translateX(0);opacity:1}}
+  .onb-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200}
+  .onb-tooltip{position:fixed;max-width:340px;background:#FFF;border-radius:var(--border-radius-lg);padding:16px 18px;box-shadow:0 12px 40px rgba(0,0,0,.3);z-index:300}
+  .onb-tooltip h4{margin:0 0 6px;font-size:15px;font-weight:500}
+  .onb-tooltip p{margin:0 0 10px;font-size:13px;color:var(--color-text-secondary);line-height:1.5}
+  .onb-tooltip .nav{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+  .onb-tooltip .dots{display:flex;gap:4px}
+  .onb-tooltip .dot{width:6px;height:6px;border-radius:50%;background:var(--color-border-tertiary)}
+  .onb-tooltip .dot.active{background:#185FA5}
+  .onb-spotlight{position:fixed;box-shadow:0 0 0 9999px rgba(0,0,0,.6);border-radius:8px;pointer-events:none;z-index:201;transition:all .3s}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+</style>
+</head>
+<body>
+<h1 class="sr-only">Subnetting Trainer — interactive learning experience for IPv4 subnetting</h1>
+
+<div class="st-app">
+  <div class="st-header">
+    <div>
+      <h2 class="st-title">Subnetting Trainer</h2>
+      <p class="st-sub">Study, practice, prove it. Earn badges along the way.</p>
+    </div>
+    <div class="st-hud" id="hud-zone">
+      <span class="st-pill">Score <b id="hud-score">0</b></span>
+      <span class="st-pill">Streak <b id="hud-streak">0</b></span>
+      <span class="st-pill">Mission <b id="hud-mission">0</b>/6</span>
+      <span class="st-pill">🏅 <b id="hud-ach-count">0</b>/15</span>
+      <span class="st-pill tier-vet" id="hud-vet" style="display:none">🥉</span>
+      <span class="st-pill tier-exp" id="hud-exp" style="display:none">🥈</span>
+      <span class="st-pill tier-night" id="hud-night" style="display:none">🥇</span>
+      <span class="st-pill" id="hud-boss" style="display:none">🐉</span>
+      <button class="help-btn" id="help-btn">? Help</button>
+    </div>
+  </div>
+  <div class="st-tabs" id="tabs"></div>
+  <div id="stages"></div>
+</div>
+
+<script>
+(function(){
+const S={score:0,streak:0,completed:[!1,!1,!1,!1,!1,!1],lessonDone:[!1,!1,!1,!1,!1,!1],bossDefeated:!1,challengeBeaten:{vet:!1,exp:!1,night:!1},achievements:{},flags:{sandboxUsed:!1,perfectBoss:!0},current:0,stage:'study',onboardingDone:!1};
+
+const ACH=[
+{id:'first-lesson',n:'First Steps',i:'👣',d:'Complete your first lesson',r:5,c:'Progression'},
+{id:'first-mission',n:'Mission Briefed',i:'🎯',d:'Clear Mission 1',r:10,c:'Progression'},
+{id:'half-way',n:'Halfway There',i:'⛰️',d:'Clear 3 missions',r:25,c:'Progression'},
+{id:'all-missions',n:'Mission Master',i:'🏆',d:'Clear all 6 missions',r:50,c:'Progression'},
+{id:'boss-down',n:'Sphinx Slayer',i:'🐉',d:'Defeat the Final Boss',r:100,c:'Progression'},
+{id:'streak-5',n:'On Fire',i:'🔥',d:'5 correct in a row',r:15,c:'Streaks'},
+{id:'streak-10',n:'Unstoppable',i:'⚡',d:'10 correct in a row',r:30,c:'Streaks'},
+{id:'streak-20',n:'Subnet Savant',i:'🌟',d:'20 correct in a row',r:75,c:'Streaks'},
+{id:'speedrun',n:'Speedrunner',i:'💨',d:'Finish a timed mission with 30+ seconds left',r:25,c:'Speed & Precision'},
+{id:'perfect-mission',n:'Flawless',i:'💎',d:'100% on any mission',r:30,c:'Speed & Precision'},
+{id:'perfect-boss',n:'No Mistakes',i:'🛡️',d:'Beat boss without resetting any HP bar',r:75,c:'Speed & Precision'},
+{id:'nightmare',n:'Nightmare Survivor',i:'🥇',d:'Clear Nightmare challenge',r:100,c:'Speed & Precision'},
+{id:'sandbox',n:'Tinkerer',i:'🧪',d:'Use the Sandbox',r:10,c:'Exploration'},
+{id:'topologist',n:'Network Architect',i:'🗺️',d:'Build a topology with 5+ devices',r:20,c:'Exploration'},
+{id:'all-tiers',n:'Triple Threat',i:'🎖️',d:'Clear all three challenge tiers',r:50,c:'Exploration'}
+];
+
+function unlock(id){if(S.achievements[id])return;const a=ACH.find(x=>x.id===id);if(!a)return;S.achievements[id]=!0;S.score+=a.r;toast(a);hud();}
+function toast(a){const t=document.createElement('div');t.className='toast';t.innerHTML='<div class="ico">'+a.i+'</div><div class="body"><div class="t">Achievement Unlocked</div><div class="n">'+a.n+'</div><div class="r">+'+a.r+' points</div></div>';document.body.appendChild(t);setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .4s';setTimeout(()=>t.remove(),400);},3500);}
+function checkAch(e,d){
+  if(e==='lesson')unlock('first-lesson');
+  if(e==='mission'){unlock('first-mission');const c=S.completed.filter(Boolean).length;if(c>=3)unlock('half-way');if(c===6)unlock('all-missions');if(d&&d.perfect)unlock('perfect-mission');if(d&&d.timeLeft>=30)unlock('speedrun');}
+  if(e==='streak'){if(S.streak>=5)unlock('streak-5');if(S.streak>=10)unlock('streak-10');if(S.streak>=20)unlock('streak-20');}
+  if(e==='boss'){unlock('boss-down');if(S.flags.perfectBoss)unlock('perfect-boss');}
+  if(e==='sandbox'&&!S.flags.sandboxUsed){S.flags.sandboxUsed=!0;unlock('sandbox');}
+  if(e==='topo'&&d>=5)unlock('topologist');
+  if(e==='tier'){if(d==='night')unlock('nightmare');if(S.challengeBeaten.vet&&S.challengeBeaten.exp&&S.challengeBeaten.night)unlock('all-tiers');}
+}
+
+const M=[
+{id:0,title:'Mission 1: Binary Bootcamp',topic:'Binary & octets',study:[{h:'IPv4 = 32 bits',p:'Four octets of 8 bits each, in dotted decimal. Each octet 0-255.',e:'192.168.1.10 = 11000000.10101000.00000001.00001010'},{h:'Bit values',p:'128, 64, 32, 16, 8, 4, 2, 1. Add the 1s.',e:'10110100 = 128+32+16+4 = 180'},{h:'Decimal to binary',p:'Subtract the largest bit that fits, repeat with the remainder.',e:'200 = 128+64+8 = 11001000'}]},
+{id:1,title:'Mission 2: Class Sorting',topic:'IPv4 classes',study:[{h:'Classes by first octet',p:'A: 1-126, B: 128-191, C: 192-223, D: 224-239, E: 240-255.',e:''},{h:'127 = loopback',p:'127.0.0.1 is loopback, not a real Class A host.',e:''},{h:'Default masks',p:'A=/8, B=/16, C=/24.',e:''},{h:'Private (RFC 1918)',p:'10/8, 172.16/12, 192.168/16. Non-routable on the public internet.',e:''}]},
+{id:2,title:'Mission 3: Mask Match',topic:'CIDR and subnet mask',study:[{h:'CIDR counts net bits',p:'/24 means the first 24 bits are the network portion.',e:'/24 = 255.255.255.0'},{h:'Common masks',p:'/25=.128, /26=.192, /27=.224, /28=.240, /30=.252.',e:''},{h:'Octet values',p:'128, 192, 224, 240, 248, 252, 254, 255.',e:''}]},
+{id:3,title:'Mission 4: Host Count',topic:'Hosts and subnets',study:[{h:'Hosts per subnet = 2^h - 2',p:'h is host bits = 32 minus prefix. Subtract 2 for network and broadcast.',e:'/26 = 6 host bits = 62 usable'},{h:'Subnets = 2^s',p:'s is bits borrowed from the host portion.',e:'/24 to /27 borrows 3 bits = 8 subnets'},{h:'/31 and /32',p:'/31 (RFC 3021) gives 2 usable for point-to-point. /32 is a single host route.',e:''}]},
+{id:4,title:'Mission 5: Network ID',topic:'Network and broadcast',study:[{h:'Block size',p:'256 minus the interesting mask octet tells you how subnets are spaced.',e:'/26 = 256-192 = block 64'},{h:'Network ID',p:'Lowest address in the block. Broadcast is one less than the next boundary.',e:'192.168.1.100/26 = net .64, bc .127'},{h:'AND with mask',p:'Bitwise AND of IP and mask gives the network ID.',e:''}]},
+{id:5,title:'Mission 6: VLSM',topic:'Variable-length subnetting',study:[{h:'Different masks per subnet',p:'Size each subnet to its actual host count to reduce waste.',e:''},{h:'Largest first',p:'Sort requirements descending. Pick the smallest prefix that fits each.',e:'50,25,10,2 = /26,/27,/28,/30'},{h:'Watch boundaries',p:'Each subnet starts on its block-size boundary.',e:''}]}
+];
+
+function ipToInt(ip){return ip.split('.').reduce((a,o)=>(a<<8)+(parseInt(o,10)&255),0)>>>0;}
+function intToIp(n){return [(n>>>24)&255,(n>>>16)&255,(n>>>8)&255,n&255].join('.');}
+function maskFP(p){return p===0?0:(0xFFFFFFFF<<(32-p))>>>0;}
+function isIp(ip){const p=ip.split('.');if(p.length!==4)return!1;return p.every(x=>/^\d+$/.test(x)&&+x>=0&&+x<=255);}
+function cls(o){if(o>=1&&o<=126)return 'A';if(o===127)return 'Loopback';if(o>=128&&o<=191)return 'B';if(o>=192&&o<=223)return 'C';if(o>=224&&o<=239)return 'D';return 'E';}
+function shuf(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function pick(a,n){return shuf(a).slice(0,n);}
+function pone(a){return a[Math.floor(Math.random()*a.length)];}
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function shO(it){const c=it.opts[it.a];const o=shuf(it.opts);return {q:it.q,opts:o,a:o.indexOf(c)};}
+
+const P0=[];
+[['11001010',202],['10101111',175],['11110000',240],['10000001',129],['11011010',218],['01110011',115],['10101010',170],['11000000',192],['00111100',60],['11100001',225],['01011001',89],['10010110',150],['11111110',254],['00011111',31],['10110100',180]].forEach(([b,d])=>{const w=shuf([d-2,d+1,d-4,d+3,d^0xFF,Math.abs(d-32)]).filter(x=>x!==d&&x>=0&&x<=255).slice(0,3);P0.push({q:'Convert '+b+' to decimal.',opts:[String(d),...w.map(String)],a:0});});
+[[175,'10101111'],[200,'11001000'],[127,'01111111'],[240,'11110000'],[99,'01100011'],[33,'00100001'],[192,'11000000'],[218,'11011010'],[50,'00110010'],[149,'10010101']].forEach(([d,b])=>{const w=shuf([(d-1).toString(2).padStart(8,'0'),(d+1).toString(2).padStart(8,'0'),(d^0x55).toString(2).padStart(8,'0').slice(-8)]);P0.push({q:'Convert '+d+' to binary.',opts:[b,...w],a:0});});
+P0.push({q:'How many bits in an IPv4 address?',opts:['32','16','24','64'],a:0});
+P0.push({q:'How many bits in one octet?',opts:['4','8','16','32'],a:1});
+P0.push({q:'Max value of one octet?',opts:['127','255','256','511'],a:1});
+
+const P1=[];
+const CR={A:[1,126],B:[128,191],C:[192,223],D:[224,239],E:[240,255]};
+['A','B','C','D','E'].forEach(c=>{for(let i=0;i<3;i++){const[lo,hi]=CR[c];const ip=rnd(lo,hi)+'.'+rnd(0,255)+'.'+rnd(0,255)+'.'+rnd(1,254);P1.push({q:ip+' is which class?',opts:['A','B','C','D','E'].filter(x=>x!==c).slice(0,3).concat([c]),a:3});}});
+P1.push({q:'Default mask for Class A?',opts:['255.0.0.0','255.255.0.0','255.255.255.0','255.255.255.128'],a:0});
+P1.push({q:'Default mask for Class B?',opts:['255.0.0.0','255.255.0.0','255.255.255.0','255.255.255.128'],a:1});
+P1.push({q:'Default mask for Class C?',opts:['255.0.0.0','255.255.0.0','255.255.255.0','255.255.255.128'],a:2});
+P1.push({q:'127.0.0.1 is for?',opts:['Multicast','Loopback','Broadcast','APIPA'],a:1});
+P1.push({q:'Class D used for?',opts:['Public unicast','Multicast','Research','Private LAN'],a:1});
+P1.push({q:'169.254.0.0/16 is for?',opts:['Loopback','Multicast','APIPA','Public'],a:2});
+P1.push({q:'Class A private range?',opts:['10.0.0.0/8','11.0.0.0/8','12.0.0.0/8','100.64.0.0/10'],a:0});
+P1.push({q:'Class B private range?',opts:['172.0.0.0/12','172.16.0.0/12','172.31.0.0/12','172.32.0.0/12'],a:1});
+P1.push({q:'8.8.8.8 is?',opts:['Public','Private','Loopback','Multicast'],a:0});
+P1.push({q:'172.20.0.5 is?',opts:['Public','Private','Loopback','Multicast'],a:1});
+for(let i=0;i<P1.length;i++)P1[i]=shO(P1[i]);
+
+const P2=[{left:'/30',right:'255.255.255.252'},{left:'/29',right:'255.255.255.248'},{left:'/28',right:'255.255.255.240'},{left:'/27',right:'255.255.255.224'},{left:'/26',right:'255.255.255.192'},{left:'/25',right:'255.255.255.128'},{left:'/24',right:'255.255.255.0'},{left:'/23',right:'255.255.254.0'},{left:'/22',right:'255.255.252.0'},{left:'/21',right:'255.255.248.0'},{left:'/20',right:'255.255.240.0'},{left:'/19',right:'255.255.224.0'},{left:'/16',right:'255.255.0.0'},{left:'/8',right:'255.0.0.0'}];
+
+const P3=[];
+for(let p=16;p<=30;p++)P3.push({q:'Usable hosts in /'+p+'?',a:String(Math.pow(2,32-p)-2),hint:'2^('+(32-p)+') - 2'});
+[12,16,20,24,27,28].forEach(p=>P3.push({q:'Host bits in /'+p+'?',a:String(32-p),hint:'32 - '+p}));
+[{p:24,c:27,n:8},{p:24,c:26,n:4},{p:24,c:28,n:16},{p:16,c:20,n:16},{p:16,c:24,n:256},{p:20,c:24,n:16}].forEach(s=>P3.push({q:'Subnet /'+s.p+' into /'+s.c+'s. How many?',a:String(s.n),hint:'2^'+(s.c-s.p)}));
+[{h:50,p:'/26'},{h:25,p:'/27'},{h:100,p:'/25'},{h:10,p:'/28'},{h:6,p:'/29'},{h:200,p:'/24'},{h:14,p:'/28'},{h:30,p:'/27'}].forEach(f=>P3.push({q:'Smallest prefix for '+f.h+' hosts?',a:f.p,hint:'2^h - 2 >= '+f.h}));
+
+const P4=[];
+for(let i=0;i<60;i++){const pre=pone([20,21,22,25,26,27,28,29]);const o1=pone([10,172,192]);let o2,o3,o4;if(o1===10){o2=rnd(0,255);o3=rnd(0,255);o4=rnd(0,255);}else if(o1===172){o2=rnd(16,31);o3=rnd(0,255);o4=rnd(0,255);}else{o2=168;o3=rnd(0,255);o4=rnd(0,255);}const ip=o1+'.'+o2+'.'+o3+'.'+o4;const m=maskFP(pre);const net=(ipToInt(ip)&m)>>>0;const bc=(net|(~m>>>0))>>>0;const io=Math.floor(pre/8);const mo=parseInt(intToIp(m).split('.')[io],10);const bs=256-mo;const at=pone(['network','broadcast','first','last']);if(at==='network')P4.push({q:'Network ID for '+ip+' /'+pre+'?',a:intToIp(net),hint:'block oct '+(io+1)+' = '+bs});else if(at==='broadcast')P4.push({q:'Broadcast for '+ip+' /'+pre+'?',a:intToIp(bc),hint:'block = '+bs});else if(at==='first'&&pre<31)P4.push({q:'First host for '+ip+' /'+pre+'?',a:intToIp(net+1),hint:'net + 1'});else if(at==='last'&&pre<31)P4.push({q:'Last host for '+ip+' /'+pre+'?',a:intToIp(bc-1),hint:'bc - 1'});}
+
+const P5=[];
+[{h:50,p:'/26'},{h:25,p:'/27'},{h:100,p:'/25'},{h:10,p:'/28'},{h:6,p:'/29'},{h:200,p:'/24'}].forEach(f=>{const c=f.p;const d=['/24','/25','/26','/27','/28','/29','/30'].filter(x=>x!==c);P5.push({q:'You need '+f.h+' hosts. Smallest prefix?',opts:[c,...shuf(d).slice(0,3)],a:0});});
+[{a:'192.168.1.0/26',n:'192.168.1.64'},{a:'10.0.0.0/27',n:'10.0.0.32'},{a:'10.0.0.0/28',n:'10.0.0.16'},{a:'192.168.10.0/29',n:'192.168.10.8'}].forEach(n=>{const c=n.n;const p=c.split('.');const oc=parseInt(p[3]||p[2],10);const ds=[String(oc/2),String(oc*2),String(oc+16)].filter(x=>+x!==oc&&+x>=0&&+x<=255);const di=ds.slice(0,3).map(o=>p.slice(0,3).join('.')+'.'+o);P5.push({q:'After '+n.a+', next subnet starts?',opts:[c,...di].slice(0,4),a:0});});
+P5.push({q:'Best mask for 2-host point-to-point?',opts:['/28','/29','/30','/24'],a:2});
+P5.push({q:'Best mask for 14 usable hosts?',opts:['/27','/28','/29','/26'],a:1});
+P5.push({q:'/29 supports how many hosts?',opts:['4','6','8','14'],a:1});
+P5.push({q:'/30 supports how many hosts?',opts:['1','2','4','6'],a:1});
+for(let i=0;i<P5.length;i++)P5[i]=shO(P5[i]);
+
+const TC={0:{type:'mc',timed:!0,time:60,n:5,pool:P0},1:{type:'mc',timed:!0,time:60,n:6,pool:P1},2:{type:'match',n:7,pool:P2},3:{type:'fill',n:8,pool:P3},4:{type:'fill',n:9,pool:P4},5:{type:'mc',timed:!0,time:80,n:10,pool:P5}};
+
+const cMC=[{q:'10.5.50.150 /22 - broadcast?',opts:['10.5.51.255','10.5.55.255','10.5.50.255','10.5.63.255'],a:0},{q:'172.16.200.45 /20 - network?',opts:['172.16.192.0','172.16.200.0','172.16.208.0','172.16.196.0'],a:0},{q:'/20 split into /26s - how many?',opts:['16','32','64','128'],a:2},{q:'192.168.50.250 /21 - network?',opts:['192.168.48.0','192.168.50.0','192.168.40.0','192.168.56.0'],a:0},{q:'Usable hosts in /19?',opts:['8190','8192','16382','4094'],a:0},{q:'Broadcast for 192.168.100.50 /28?',opts:['192.168.100.63','192.168.100.47','192.168.100.55','192.168.100.79'],a:0},{q:'Block size for /21 in oct 3?',opts:['4','8','16','32'],a:1},{q:'172.16.40.0 /23 - next adjacent?',opts:['172.16.41.0','172.16.42.0','172.16.48.0','172.16.44.0'],a:1}].map(shO);
+const cFill=[{q:'Network for 172.20.150.222 /18?',a:'172.20.128.0',hint:'block = 64'},{q:'Broadcast for 10.100.50.30 /23?',a:'10.100.51.255',hint:'block = 2'},{q:'Usable hosts in /17?',a:'32766',hint:'2^15 - 2'},{q:'Usable hosts in /14?',a:'262142',hint:'2^18 - 2'},{q:'Network for 192.168.150.99 /19?',a:'192.168.128.0',hint:'block = 32'},{q:'Smallest prefix for 2000 hosts?',a:'/21',hint:'2^11 - 2'}];
+const TI={vet:{n:'Veteran',mP:5,fP:5,t:8,tot:10,th:.9,m:2,h:!0,b:'🥉',cls:'vet'},exp:{n:'Expert',mP:5,fP:5,t:6,tot:10,th:.9,m:3,h:!1,b:'🥈',cls:'exp'},night:{n:'Nightmare',mP:6,fP:6,t:4,tot:12,th:1,m:5,h:!1,b:'🥇',cls:'night'}};
+const bMC=[{q:'BOSS - 192.168.1.130 /26 network?',opts:['192.168.1.64','192.168.1.128','192.168.1.96','192.168.1.0'],a:1},{q:'BOSS - Class B private?',opts:['172.0.0.0/12','172.16.0.0/12','172.31.0.0/12','172.32.0.0/12'],a:1},{q:'BOSS - /20 split into /24s?',opts:['8','16','32','64'],a:1},{q:'BOSS - Broadcast 10.5.50.150 /22?',opts:['10.5.51.255','10.5.55.255','10.5.50.255','10.5.63.255'],a:0}].map(shO);
+const bFill=[{q:'BOSS - Broadcast for 10.20.30.99 /27?',a:'10.20.30.127',hint:'block = 32'},{q:'BOSS - Usable hosts in /22?',a:'1022',hint:'2^10 - 2'},{q:'BOSS - Network 192.168.50.250 /21?',a:'192.168.48.0',hint:'block = 8'}];
+const bMatch=[{left:'/26',right:'255.255.255.192'},{left:'/21',right:'255.255.248.0'},{left:'/14',right:'255.252.0.0'},{left:'/29',right:'255.255.255.248'}];
+
+const tabsEl=document.getElementById('tabs');
+const stagesEl=document.getElementById('stages');
+
+function locked(i){if(i<6)return i===0?!1:!S.completed[i-1];if(i===6||i===7||i===10)return!1;if(i===8)return!S.completed.slice(0,3).every(Boolean);if(i===9)return!S.completed.every(Boolean);return!0;}
+function tabs(){tabsEl.innerHTML='';M.forEach((m,i)=>{const t=document.createElement('button');t.className='st-tab'+(S.current===i?' active':'')+(locked(i)?' locked':'');t.textContent=(S.completed[i]?'✓ ':'')+'M'+(i+1);t.onclick=()=>{if(!locked(i)){S.current=i;S.stage='study';render();}};tabsEl.appendChild(t);});
+[[6,'sandbox','🧪 Sandbox'],[7,'topo','🗺️ Topology'],[8,'challenge','⚡ Challenge'],[9,'boss',S.bossDefeated?'🏆 Boss':'🐉 Final Boss'],[10,'ach','🏅 Achievements']].forEach(([idx,c,l])=>{const b=document.createElement('button');b.className='st-tab '+c+(S.current===idx?' active':'')+(locked(idx)?' locked':'');b.textContent=l;b.onclick=()=>{if(!locked(idx)){S.current=idx;render();}};tabsEl.appendChild(b);});}
+function hud(){document.getElementById('hud-score').textContent=S.score;document.getElementById('hud-streak').textContent=S.streak;document.getElementById('hud-mission').textContent=S.completed.filter(Boolean).length;document.getElementById('hud-ach-count').textContent=Object.keys(S.achievements).length;document.getElementById('hud-vet').style.display=S.challengeBeaten.vet?'inline-flex':'none';document.getElementById('hud-exp').style.display=S.challengeBeaten.exp?'inline-flex':'none';document.getElementById('hud-night').style.display=S.challengeBeaten.night?'inline-flex':'none';document.getElementById('hud-boss').style.display=S.bossDefeated?'inline-flex':'none';}
+
+function render(){tabs();hud();stagesEl.innerHTML='';if(S.current===6){renderSandbox();return;}if(S.current===7){renderTopo();return;}if(S.current===8){renderChallenge();return;}if(S.current===9){renderBoss();return;}if(S.current===10){renderAch();return;}renderMissionFlow();}
+
+function renderMissionFlow(){const m=M[S.current];const nav=document.createElement('div');nav.className='stage-tabs';[['study','📖 Study'],['lesson','🧪 Lesson'],['mission','🎯 Mission']].forEach(([k,l])=>{const b=document.createElement('button');b.className='stage-tab'+(S.stage===k?' active':'');if(k==='mission'&&!S.lessonDone[m.id])b.classList.add('locked');b.textContent=l;b.onclick=()=>{if(k==='mission'&&!S.lessonDone[m.id])return;S.stage=k;render();};nav.appendChild(b);});stagesEl.appendChild(nav);if(S.stage==='study')renderStudy(m);else if(S.stage==='lesson')renderLesson(m);else renderMission(m);}
+
+function renderStudy(m){const c=document.createElement('div');c.className='st-card';c.innerHTML='<h3 style="font-size:16px;font-weight:500;margin:0 0 4px;">📖 '+m.title+'</h3><p style="font-size:13px;color:var(--color-text-secondary);margin:0 0 12px;">Topic: '+m.topic+'</p>'+m.study.map(s=>'<div class="study-section"><h4>'+s.h+'</h4><p>'+s.p+'</p>'+(s.e?'<div class="ex">'+s.e+'</div>':'')+'</div>').join('');stagesEl.appendChild(c);const n=document.createElement('button');n.className='st-btn lesson';n.style.marginTop='10px';n.textContent='Continue to lesson →';n.onclick=()=>{S.stage='lesson';render();};stagesEl.appendChild(n);}
+
+function renderMission(m){const c=document.createElement('div');c.className='st-mission';stagesEl.appendChild(c);const cfg=TC[m.id];if(S.completed[m.id]){c.innerHTML='<h3>🎯 Mission complete</h3><p style="font-size:13px;color:var(--color-text-secondary);">Replay or move on.</p>';const r=document.createElement('button');r.className='st-btn';r.textContent='Replay';r.onclick=()=>{S.completed[m.id]=!1;render();};c.appendChild(r);if(m.id<5){const n=document.createElement('button');n.className='st-btn primary';n.textContent='Next →';n.style.marginLeft='8px';n.onclick=()=>{S.current=m.id+1;S.stage='study';render();};c.appendChild(n);}return;}const drawn=pick(cfg.pool,cfg.n);const t={type:cfg.type,timed:cfg.timed,time:cfg.time,items:drawn};if(t.type==='mc')mcRun(m,t,c);else if(t.type==='fill')fillRun(m,t,c);else matchRun(m,t,c);}
+
+function lessonDone(m,c){S.lessonDone[m.id]=!0;S.score+=10;hud();checkAch('lesson');const fb=document.createElement('div');fb.className='st-feedback ok';fb.style.marginTop='12px';fb.textContent='✓ Lesson cleared. +10 points.';c.appendChild(fb);const b=document.createElement('button');b.className='st-btn primary';b.style.marginTop='10px';b.textContent='Start mission →';b.onclick=()=>{S.stage='mission';render();};c.appendChild(b);}
+
+function renderLesson(m){const c=document.createElement('div');c.className='lesson-card';stagesEl.appendChild(c);if(m.id===0)L0(m,c);else if(m.id===1)L1(m,c);else if(m.id===2)L2(m,c);else if(m.id===3)L3(m,c);else if(m.id===4)L4(m,c);else L5(m,c);}
+
+function L0(m,c){c.innerHTML='<h3>🧪 Bit Flipper</h3><p class="subt">Toggle bits to match target 3 times.</p>';const ts=shuf([180,200,47,129,218,75,153,222,99,35]).slice(0,5);let r=0,h=0;let bits=[0,0,0,0,0,0,0,0];const v=[128,64,32,16,8,4,2,1];const tE=document.createElement('div');tE.className='target-display';c.appendChild(tE);const g=document.createElement('div');g.className='bit-grid';c.appendChild(g);const lr=document.createElement('div');lr.className='live-readout';lr.innerHTML='<div style="font-size:11px;color:var(--color-text-secondary);">Current</div><div class="v" id="lv">0</div>';c.appendChild(lr);const st=document.createElement('div');st.style.cssText='text-align:center;margin-top:8px;font-size:13px;';c.appendChild(st);function rf(){g.innerHTML='';bits.forEach((b,i)=>{const cl=document.createElement('div');cl.className='bit-cell';cl.innerHTML='<div class="v">'+v[i]+'</div><div class="b'+(b?' on':'')+'">'+b+'</div>';cl.onclick=()=>{bits[i]=b?0:1;rf();ck();};g.appendChild(cl);});const sm=bits.reduce((a,b,i)=>a+(b?v[i]:0),0);document.getElementById('lv').textContent=sm;tE.textContent='Target: '+ts[r];tE.classList.toggle('good',sm===ts[r]);st.textContent='Round '+(r+1)+'/3 · Hits: '+h;}function ck(){const sm=bits.reduce((a,b,i)=>a+(b?v[i]:0),0);if(sm===ts[r]){h++;r++;if(h>=3){lessonDone(m,c);return;}bits=[0,0,0,0,0,0,0,0];setTimeout(rf,600);}}rf();}
+
+function L1(m,c){c.innerHTML='<h3>🧪 Class Detector</h3><p class="subt">Slide to class. 4 right.</p>';const z=[{f:1,t:126,l:'A',c:'#B5D4F4'},{f:127,t:127,l:'LB',c:'#D3D1C7'},{f:128,t:191,l:'B',c:'#9FE1CB'},{f:192,t:223,l:'C',c:'#FAC775'},{f:224,t:239,l:'D',c:'#CECBF6'},{f:240,t:255,l:'E',c:'#F4C0D1'}];const ln=document.createElement('div');ln.style.cssText='position:relative;height:50px;margin:20px 0 30px;background:var(--color-background-primary);border-radius:var(--border-radius-md);';z.forEach(zo=>{const d=document.createElement('div');d.style.cssText='position:absolute;top:0;bottom:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;background:'+zo.c;d.style.left=(zo.f/255)*100+'%';d.style.width=((zo.t-zo.f+1)/255)*100+'%';d.textContent=zo.l;ln.appendChild(d);});c.appendChild(ln);const sl=document.createElement('input');sl.type='range';sl.min=0;sl.max=255;sl.value=10;sl.style.width='100%';c.appendChild(sl);const ps=shuf([{ip:'10.x.x.x',e:'A'},{ip:'126.0.0.1',e:'A'},{ip:'172.20.x.x',e:'B'},{ip:'190.10.10.10',e:'B'},{ip:'192.168.x.x',e:'C'},{ip:'225.0.0.5',e:'D'},{ip:'250.1.1.1',e:'E'}]).slice(0,6);let pi=0,co=0;const pb=document.createElement('div');pb.style.cssText='margin-top:14px;padding:10px;background:var(--color-background-primary);border-radius:var(--border-radius-md);';c.appendChild(pb);function wc(v){const x=z.find(z=>v>=z.f&&v<=z.t);return x?x.l:'';}function rf(){const v=parseInt(sl.value);pb.innerHTML='<div style="display:flex;justify-content:space-between;"><div><div style="font-size:12px;color:var(--color-text-secondary);">IP:</div><div style="font-family:var(--font-mono);">'+ps[pi].ip+'</div></div><div>Class: <b>'+ps[pi].e+'</b></div></div><div style="font-size:13px;color:var(--color-text-secondary);margin-top:6px;">Slider: '+v+' ('+wc(v)+') · Correct: '+co+'/4</div>';}sl.oninput=rf;const lb=document.createElement('button');lb.className='st-btn lesson';lb.style.marginTop='10px';lb.textContent='Lock';lb.onclick=()=>{const v=parseInt(sl.value);if(wc(v)===ps[pi].e){co++;if(co>=4){lessonDone(m,c);return;}pi=(pi+1)%ps.length;rf();}else{const fb=document.createElement('div');fb.className='st-feedback bad';fb.textContent='✗';c.appendChild(fb);setTimeout(()=>fb.remove(),1500);}};c.appendChild(lb);rf();}
+
+function L2(m,c){c.innerHTML='<h3>🧪 Mask Builder</h3><p class="subt">Toggle bits left to right. 3 targets.</p>';const ts=shuf(['/25','/26','/27','/28','/22','/21','/20']).slice(0,5);let r=0,h=0,p=24;const b=document.createElement('div');b.className='mask-builder';c.appendChild(b);const sp=document.createElement('div');sp.className='stepper';c.appendChild(sp);const st=document.createElement('div');st.style.cssText='text-align:center;font-size:13px;';c.appendChild(st);function rf(){b.innerHTML='';for(let i=0;i<32;i++){const x=document.createElement('button');x.className='mb-bit'+(i<p?' on':'');x.textContent=i<p?'1':'0';x.onclick=()=>{p=(i<p)?i:i+1;rf();};b.appendChild(x);if(i===7||i===15||i===23){const d=document.createElement('div');d.className='mb-dot';d.textContent='.';b.appendChild(d);}}sp.innerHTML='';[['Prefix','/'+p],['Mask',intToIp(maskFP(p))],['Net',p],['Host',32-p]].forEach(([l,v])=>{const e=document.createElement('div');e.className='step-card';e.innerHTML='<div class="l">'+l+'</div><div class="v">'+v+'</div>';sp.appendChild(e);});const tn=parseInt(ts[r].replace('/',''),10);st.innerHTML='Target: <b>'+ts[r]+'</b> · Hits: '+h+(p===tn?' ✓':'');if(p===tn){h++;r++;if(h>=3){setTimeout(()=>lessonDone(m,c),600);return;}p=24;setTimeout(rf,800);}}rf();}
+
+function L3(m,c){c.innerHTML='<h3>🧪 Host Calculator</h3><p class="subt">Slide prefix. 4 targets.</p>';const ts=shuf([{h:30,l:'30'},{h:62,l:'62'},{h:14,l:'14'},{h:126,l:'126'},{h:6,l:'6'},{h:254,l:'254'}]).slice(0,6);let r=0,hi=0,p=24;const sl=document.createElement('input');sl.type='range';sl.min=8;sl.max=30;sl.value=24;sl.style.width='100%';c.appendChild(sl);const g=document.createElement('div');g.className='stepper';g.style.gridTemplateColumns='repeat(3,1fr)';c.appendChild(g);const tg=document.createElement('div');tg.style.cssText='text-align:center;font-size:14px;';c.appendChild(tg);function rf(){p=parseInt(sl.value);const hb=32-p;const u=Math.max(0,Math.pow(2,hb)-2);g.innerHTML='';[['Prefix','/'+p],['Bits',hb],['Usable',u]].forEach(([l,v])=>{const e=document.createElement('div');e.className='step-card';e.innerHTML='<div class="l">'+l+'</div><div class="v">'+v+'</div>';g.appendChild(e);});const t=ts[r];tg.innerHTML='Target: <b>'+t.l+' usable</b> · Hits: '+hi+(u===t.h?' ✓':'');if(u===t.h){hi++;r++;if(hi>=4){setTimeout(()=>lessonDone(m,c),600);return;}sl.value=24;setTimeout(rf,800);}}sl.oninput=rf;rf();}
+
+function L4(m,c){c.innerHTML='<h3>🧪 Network ID Stepper</h3><p class="subt">Click the boundary containing the IP.</p>';const sc=[];while(sc.length<4){const pre=pone([22,25,26,27,28]);const o1=pone([10,172,192]);let o2,o3,o4;if(o1===10){o2=rnd(0,255);o3=rnd(0,255);o4=rnd(0,255);}else if(o1===172){o2=rnd(16,31);o3=rnd(0,255);o4=rnd(0,255);}else{o2=168;o3=rnd(0,255);o4=rnd(0,255);}const ip=o1+'.'+o2+'.'+o3+'.'+o4;const net=(ipToInt(ip)&maskFP(pre))>>>0;sc.push({ip,pre,exp:intToIp(net)});}let r=0,h=0;const ib=document.createElement('div');ib.style.cssText='background:var(--color-background-primary);padding:10px;border-radius:var(--border-radius-md);text-align:center;font-family:var(--font-mono);';c.appendChild(ib);const sl=document.createElement('div');sl.className='vlsm-slots';c.appendChild(sl);const st=document.createElement('div');st.style.cssText='text-align:center;font-size:13px;margin-top:8px;';c.appendChild(st);function rf(){const s=sc[r];ib.textContent=s.ip+' /'+s.pre;const m=maskFP(s.pre);const io=Math.floor(s.pre/8);const mo=parseInt(intToIp(m).split('.')[io],10);const bs=256-mo;const ipo=s.ip.split('.').map(x=>parseInt(x,10));const iv=ipo[io];sl.innerHTML='';const bds=[];for(let v=0;v<256;v+=bs)bds.push(v);const ss=Math.max(0,Math.floor(iv/bs)-3);bds.slice(ss,ss+8).forEach(b=>{const oct=ipo.slice();oct[io]=b;for(let k=io+1;k<4;k++)oct[k]=0;const ni=oct.join('.');const sx=document.createElement('div');sx.className='vlsm-slot';sx.textContent=ni;sx.onclick=()=>{if(ni===s.exp){sx.classList.add('taken');h++;r++;st.innerHTML='✓ '+s.exp;if(h>=3){setTimeout(()=>lessonDone(m,c),800);return;}setTimeout(rf,1100);}else st.innerHTML='✗ try again';};sl.appendChild(sx);});st.textContent='Round '+(r+1)+'/3 · Hits: '+h;}rf();}
+
+function L5(m,c){const pl=[{s:'192.168.1.0/24',r:[{n:'Sales',h:50,p:26},{n:'Eng',h:25,p:27},{n:'Guest',h:10,p:28},{n:'P2P',h:2,p:30}]},{s:'10.0.0.0/24',r:[{n:'Prod',h:100,p:25},{n:'Office',h:30,p:27},{n:'IoT',h:12,p:28},{n:'Mgmt',h:2,p:30}]}];const sc=pone(pl);const rs=sc.r.map(r=>Object.assign({placed:!1},r));c.innerHTML='<h3>🧪 VLSM Allocator</h3><p class="subt">Allocate '+sc.s+'.</p>';const off=['/25','/26','/27','/28','/29','/30'];let act=0;const rw=document.createElement('div');c.appendChild(rw);const lb=document.createElement('div');lb.style.cssText='font-size:13px;margin:14px 0 4px;color:var(--color-text-secondary);';c.appendChild(lb);const sl=document.createElement('div');sl.className='vlsm-slots';sl.style.gridTemplateColumns='repeat(6,1fr)';c.appendChild(sl);const fb=document.createElement('div');c.appendChild(fb);function rf(){rw.innerHTML='';rs.forEach((r,i)=>{const row=document.createElement('div');row.className='vlsm-req'+(r.placed?' placed':'');row.innerHTML='<div><div class="name">'+r.n+'</div><div class="meta">'+r.h+' hosts</div></div><div class="meta">'+(r.placed?'✓':(act===i?'← Active':''))+'</div>';if(!r.placed&&act!==i)row.style.cursor='pointer';row.onclick=()=>{if(!r.placed){act=i;rf();}};rw.appendChild(row);});const ar=rs[act];lb.innerHTML=ar&&!ar.placed?'Pick smallest for <b>'+ar.h+' hosts</b>:':'Done.';sl.innerHTML='';off.forEach(p=>{const pn=parseInt(p.replace('/',''),10);const u=Math.pow(2,32-pn)-2;const slt=document.createElement('div');slt.className='vlsm-slot';slt.innerHTML=p+'<br><span style="font-size:10px;color:var(--color-text-secondary);">'+u+' hosts</span>';slt.onclick=()=>{if(!ar||ar.placed)return;if(pn===ar.p){ar.placed=!0;const nx=rs.findIndex(r=>!r.placed);act=nx===-1?act:nx;fb.innerHTML='<div class="st-feedback ok">✓ Fits.</div>';setTimeout(()=>fb.innerHTML='',1400);if(rs.every(r=>r.placed)){setTimeout(()=>lessonDone(m,c),800);return;}rf();}else if(pn<ar.p){fb.innerHTML='<div class="st-feedback bad">✗ Too small.</div>';setTimeout(()=>fb.innerHTML='',1500);}else{fb.innerHTML='<div class="st-feedback bad">✗ Wastes space.</div>';setTimeout(()=>fb.innerHTML='',1500);}};sl.appendChild(slt);});}rf();}
+
+function mcRun(m,t,co){let i=0,cor=0,tm=null,tl=t.time;function step(){if(i>=t.items.length){fin();return;}const it=t.items[i];co.innerHTML='';const h=document.createElement('div');h.style.cssText='display:flex;justify-content:space-between;';h.innerHTML='<h3 style="margin:0;">'+m.title+'</h3>'+(t.timed?'<span class="st-timer" id="tmr">⏱ '+tl+'s</span>':'');co.appendChild(h);const p=document.createElement('div');p.className='st-progress';p.innerHTML='<div style="width:'+((i/t.items.length)*100)+'%"></div>';co.appendChild(p);const q=document.createElement('p');q.style.cssText='font-size:15px;margin:10px 0 4px;';q.textContent='Q'+(i+1)+'/'+t.items.length+': '+it.q;co.appendChild(q);const mc=document.createElement('div');mc.className='st-mc';it.opts.forEach((o,j)=>{const b=document.createElement('button');b.textContent=o;b.onclick=()=>ans(j,b,mc);mc.appendChild(b);});co.appendChild(mc);const fb=document.createElement('div');fb.className='st-feedback';co.appendChild(fb);function ans(j,btn,me){Array.from(me.children).forEach(b=>b.disabled=!0);if(j===it.a){btn.classList.add('correct');cor++;S.score+=15;S.streak++;checkAch('streak');fb.className='st-feedback ok';fb.textContent='✓';}else{btn.classList.add('wrong');me.children[it.a].classList.add('correct');S.streak=0;fb.className='st-feedback bad';fb.textContent='✗ '+it.opts[it.a];}hud();setTimeout(()=>{i++;step();},800);}}function fin(){if(tm)clearInterval(tm);const passed=cor>=Math.ceil(t.items.length*.7);const perfect=cor===t.items.length;co.innerHTML='<h3>'+(passed?'🎯 Cleared':'⚠ Failed')+'</h3><p>Score: <b>'+cor+'/'+t.items.length+'</b></p>';if(passed){S.completed[m.id]=!0;S.score+=25;if(t.timed)S.score+=Math.max(0,tl);checkAch('mission',{perfect,timeLeft:t.timed?tl:0});const nb=document.createElement('button');if(m.id===5&&S.completed.every(Boolean)){nb.className='st-btn boss';nb.textContent='🐉 Final Boss';nb.onclick=()=>{S.current=9;render();};}else{nb.className='st-btn primary';nb.textContent='Next →';nb.onclick=()=>{S.current=Math.min(m.id+1,5);S.stage='study';render();};}co.appendChild(nb);}else{const r=document.createElement('button');r.className='st-btn primary';r.textContent='Try again';r.onclick=()=>render();co.appendChild(r);}hud();}if(t.timed){tm=setInterval(()=>{tl--;const x=document.getElementById('tmr');if(x){x.textContent='⏱ '+tl+'s';x.className='st-timer'+(tl<=10?' crit':tl<=20?' warn':'');}if(tl<=0){clearInterval(tm);fin();}},1000);}step();}
+
+function fillRun(m,t,co){let i=0,cor=0;function step(){if(i>=t.items.length){fin();return;}const it=t.items[i];co.innerHTML='<h3 style="margin:0 0 4px;">'+m.title+'</h3>';const p=document.createElement('div');p.className='st-progress';p.innerHTML='<div style="width:'+((i/t.items.length)*100)+'%"></div>';co.appendChild(p);const q=document.createElement('p');q.style.cssText='font-size:15px;margin:10px 0 4px;';q.textContent='Q'+(i+1)+'/'+t.items.length+': '+it.q;co.appendChild(q);const h=document.createElement('p');h.style.cssText='font-size:12px;color:var(--color-text-tertiary);margin:0 0 10px;';h.textContent='Hint: '+it.hint;co.appendChild(h);const r=document.createElement('div');r.className='st-row';const ip=document.createElement('input');ip.className='st-input';const sb=document.createElement('button');sb.className='st-btn primary';sb.textContent='Submit';const sk=document.createElement('button');sk.className='st-btn';sk.textContent='Skip';r.appendChild(ip);r.appendChild(sb);r.appendChild(sk);co.appendChild(r);const fb=document.createElement('div');fb.className='st-feedback';co.appendChild(fb);function ck(){const v=ip.value.trim().toLowerCase().replace(/\s+/g,'');const a=String(it.a).toLowerCase().replace(/\s+/g,'');if(v===a){fb.className='st-feedback ok';fb.textContent='✓';cor++;S.score+=20;S.streak++;checkAch('streak');}else{fb.className='st-feedback bad';fb.textContent='✗ '+it.a;S.streak=0;}hud();sb.disabled=!0;ip.disabled=!0;sk.disabled=!0;setTimeout(()=>{i++;step();},900);}sb.onclick=ck;ip.onkeydown=(e)=>{if(e.key==='Enter')ck();};sk.onclick=()=>{S.streak=0;i++;step();};setTimeout(()=>ip.focus(),50);}function fin(){const passed=cor>=Math.ceil(t.items.length*.7);const perfect=cor===t.items.length;co.innerHTML='<h3>'+(passed?'🎯 Cleared':'⚠ Failed')+'</h3><p>Score: <b>'+cor+'/'+t.items.length+'</b></p>';if(passed){S.completed[m.id]=!0;S.score+=25;checkAch('mission',{perfect});const nb=document.createElement('button');if(m.id===5&&S.completed.every(Boolean)){nb.className='st-btn boss';nb.textContent='🐉 Final Boss';nb.onclick=()=>{S.current=9;render();};}else{nb.className='st-btn primary';nb.textContent='Next →';nb.onclick=()=>{S.current=Math.min(m.id+1,5);S.stage='study';render();};}co.appendChild(nb);}else{const r=document.createElement('button');r.className='st-btn primary';r.textContent='Try again';r.onclick=()=>render();co.appendChild(r);}hud();}step();}
+
+function matchRun(m,t,co){co.innerHTML='<h3 style="margin:0 0 4px;">'+m.title+'</h3><p style="font-size:13px;color:var(--color-text-secondary);">Drag masks to CIDR. '+t.items.length+' pairs.</p>';const ps=t.items;const pl=document.createElement('div');pl.className='st-dz';pl.style.marginBottom='12px';shuf(ps.map(p=>p.right)).forEach(r=>{const c=document.createElement('div');c.className='st-chip';c.draggable=!0;c.textContent=r;c.dataset.value=r;c.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',r);});pl.appendChild(c);});co.appendChild(pl);const tg=document.createElement('div');co.appendChild(tg);ps.forEach(p=>{const r=document.createElement('div');r.className='st-pair';const l=document.createElement('div');l.innerHTML='<span class="st-mono">'+p.left+'</span>';const d=document.createElement('div');d.className='st-dz';d.dataset.expected=p.right;d.addEventListener('dragover',e=>e.preventDefault());d.addEventListener('drop',e=>{e.preventDefault();const v=e.dataTransfer.getData('text/plain');const ch=Array.from(document.querySelectorAll('.st-chip')).find(c=>c.dataset.value===v);if(!ch)return;if(d.firstChild){d.firstChild.classList.remove('placed');pl.appendChild(d.firstChild);}ch.classList.add('placed');d.appendChild(ch);});r.appendChild(l);r.appendChild(d);tg.appendChild(r);});const cb=document.createElement('button');cb.className='st-btn primary';cb.textContent='Check';cb.style.marginTop='10px';co.appendChild(cb);const fb=document.createElement('div');fb.className='st-feedback';co.appendChild(fb);cb.onclick=()=>{let ok=0;tg.querySelectorAll('.st-dz').forEach(d=>{const p=d.querySelector('.st-chip');if(p&&p.dataset.value===d.dataset.expected)ok++;});S.score+=ok*15;if(ok===ps.length){fb.className='st-feedback ok';fb.textContent='🎯 Perfect ('+ok+'/'+ps.length+')';S.completed[m.id]=!0;S.score+=25;S.streak++;checkAch('streak');checkAch('mission',{perfect:!0});const nb=document.createElement('button');nb.className='st-btn primary';nb.textContent='Next →';nb.style.marginLeft='8px';nb.onclick=()=>{S.current=m.id+1;S.stage='study';render();};fb.appendChild(document.createElement('br'));fb.appendChild(nb);}else{fb.className='st-feedback bad';fb.textContent='✗ '+ok+'/'+ps.length;S.streak=0;}hud();cb.disabled=!0;};}
+
+function renderSandbox(){checkAch('sandbox');const c=document.createElement('div');c.className='st-card';c.innerHTML='<h3 style="margin:0 0 4px;">🧪 Sandbox</h3><p style="font-size:13px;color:var(--color-text-secondary);">Calculate any IP/prefix.</p>';const r=document.createElement('div');r.className='st-row';const ipI=document.createElement('input');ipI.className='st-input';ipI.value='192.168.1.100';const pI=document.createElement('input');pI.className='st-input';pI.value='26';pI.style.width='80px';const b=document.createElement('button');b.className='st-btn primary';b.textContent='Calculate';r.appendChild(document.createTextNode('IP:'));r.appendChild(ipI);r.appendChild(document.createTextNode('/'));r.appendChild(pI);r.appendChild(b);c.appendChild(r);const o=document.createElement('div');o.style.marginTop='14px';c.appendChild(o);stagesEl.appendChild(c);function calc(){o.innerHTML='';const ip=ipI.value.trim();const pre=parseInt(pI.value.replace('/',''),10);if(!isIp(ip)){o.innerHTML='<div class="st-feedback bad" style="display:block;">Invalid IP.</div>';return;}if(isNaN(pre)||pre<0||pre>32){o.innerHTML='<div class="st-feedback bad" style="display:block;">Bad prefix.</div>';return;}const m=maskFP(pre);const net=(ipToInt(ip)&m)>>>0;const bc=(net|(~m>>>0))>>>0;const hb=32-pre;let u,fh,lh;if(pre===32){u=1;fh='-';lh='-';}else if(pre===31){u=2;fh=intToIp(net);lh=intToIp(bc);}else{u=Math.pow(2,hb)-2;fh=intToIp(net+1);lh=intToIp(bc-1);}const g=document.createElement('div');g.className='sb-grid';[['Network',intToIp(net)+'/'+pre],['Broadcast',intToIp(bc)],['Mask',intToIp(m)],['First',fh],['Last',lh],['Usable',u.toLocaleString()],['Total',Math.pow(2,hb).toLocaleString()],['Class',cls(parseInt(ip.split('.')[0],10))]].forEach(([l,v])=>{const s=document.createElement('div');s.className='sb-stat';s.innerHTML='<div class="lab">'+l+'</div><div class="val">'+v+'</div>';g.appendChild(s);});o.appendChild(g);const bh=document.createElement('p');bh.style.cssText='font-size:13px;font-weight:500;margin:14px 0 4px;';bh.textContent='Binary';o.appendChild(bh);const br=document.createElement('div');br.className='bin-row';let bi=0;for(let oc=0;oc<4;oc++){const bs=parseInt(ip.split('.')[oc],10).toString(2).padStart(8,'0');const oe=document.createElement('div');oe.className='bin-octet';for(let bb=0;bb<8;bb++){const x=document.createElement('span');x.className='bin-bit '+(bi<pre?'net':'host');x.textContent=bs[bb];oe.appendChild(x);bi++;}br.appendChild(oe);if(oc<3){const d=document.createElement('span');d.className='bin-dot';d.textContent='.';br.appendChild(d);}}o.appendChild(br);}b.onclick=calc;ipI.onkeydown=(e)=>{if(e.key==='Enter')calc();};pI.onkeydown=(e)=>{if(e.key==='Enter')calc();};calc();}
+
+let topo=null;
+function dT(){return {parent:'192.168.1.0/24',subnets:[],devices:[],links:[],sel:null,lf:null,tool:'select',ni:1};}
+function carve(par,reqs){reqs=reqs.slice().sort((a,b)=>b.h-a.h);const[pip,ppr]=par.split('/');const pi=ipToInt(pip);const pm=maskFP(parseInt(ppr));const pe=(pi|(~pm>>>0))>>>0;let cur=pi;const al=[];for(const r of reqs){let p=30;while(p>=16&&Math.pow(2,32-p)-2<r.h)p--;if(p<16)p=16;const bs=Math.pow(2,32-p);if(cur%bs!==0)cur=cur+(bs-(cur%bs));if(cur+bs-1>pe)return{ok:!1,al};al.push({id:r.id,n:r.n,h:r.h,p,net:intToIp(cur),bc:intToIp(cur+bs-1)});cur+=bs;}return{ok:!0,al};}
+function rebuild(){const reqs=[];topo.links.forEach(lk=>{const a=topo.devices.find(d=>d.id===lk.a);const b=topo.devices.find(d=>d.id===lk.b);if(!a||!b)return;let h=2;let n=(a.name||'?')+'-'+(b.name||'?');if(a.type==='switch'||b.type==='switch'){const sw=a.type==='switch'?a:b;const hosts=topo.links.filter(l=>l.a===sw.id||l.b===sw.id).map(l=>{const o=l.a===sw.id?l.b:l.a;return topo.devices.find(d=>d.id===o);}).filter(d=>d&&d.type==='host');h=Math.max(h,hosts.reduce((s,x)=>s+(x.hostCount||10),0)+1);}reqs.push({id:lk.id,n,h});});if(reqs.length===0){topo.subnets=[];return;}const r=carve(topo.parent,reqs);topo.subnets=r.al;topo.links.forEach(lk=>{const s=r.al.find(x=>x.id===lk.id);lk.subnetId=s?s.id:null;});}
+function loadSc(n){topo=dT();if(n==='small'){topo.parent='192.168.1.0/24';const r=topo.ni++,sw=topo.ni++,h1=topo.ni++,h2=topo.ni++;topo.devices=[{id:r,type:'router',x:300,y:120,name:'R1'},{id:sw,type:'switch',x:300,y:260,name:'SW1'},{id:h1,type:'host',x:180,y:400,name:'Sales',hostCount:25},{id:h2,type:'host',x:420,y:400,name:'Engr',hostCount:15}];topo.links=[{id:topo.ni++,a:r,b:sw},{id:topo.ni++,a:sw,b:h1},{id:topo.ni++,a:sw,b:h2}];}else if(n==='campus'){topo.parent='172.16.0.0/22';const r1=topo.ni++,sw1=topo.ni++,sw2=topo.ni++,sw3=topo.ni++,h1=topo.ni++,h2=topo.ni++,h3=topo.ni++;topo.devices=[{id:r1,type:'router',x:380,y:120,name:'Core'},{id:sw1,type:'switch',x:200,y:280,name:'A'},{id:sw2,type:'switch',x:380,y:280,name:'B'},{id:sw3,type:'switch',x:560,y:280,name:'C'},{id:h1,type:'host',x:200,y:430,name:'Au',hostCount:120},{id:h2,type:'host',x:380,y:430,name:'Bu',hostCount:60},{id:h3,type:'host',x:560,y:430,name:'Cu',hostCount:30}];topo.links=[{id:topo.ni++,a:r1,b:sw1},{id:topo.ni++,a:r1,b:sw2},{id:topo.ni++,a:r1,b:sw3},{id:topo.ni++,a:sw1,b:h1},{id:topo.ni++,a:sw2,b:h2},{id:topo.ni++,a:sw3,b:h3}];}rebuild();}
+
+function renderTopo(){if(!topo)topo=dT();const w=document.createElement('div');w.innerHTML='<h3 style="margin:0 0 4px;">🗺️ Topology Builder</h3><p style="font-size:13px;color:var(--color-text-secondary);">Place devices, link them, watch VLSM allocate live.</p>';stagesEl.appendChild(w);const ct=document.createElement('div');ct.className='st-row';ct.style.marginBottom='8px';ct.innerHTML='<span style="font-size:13px;">Parent:</span>';const pi=document.createElement('input');pi.className='topo-input';pi.style.width='160px';pi.value=topo.parent;pi.onchange=()=>{const v=pi.value.trim();const ps=v.split('/');if(ps.length===2&&isIp(ps[0])&&+ps[1]>=0&&+ps[1]<=32){topo.parent=v;rebuild();render();}};ct.appendChild(pi);[['small','Small Office'],['campus','Campus']].forEach(([k,l])=>{const b=document.createElement('button');b.className='st-btn';b.textContent=l;b.onclick=()=>{loadSc(k);render();};ct.appendChild(b);});const cl=document.createElement('button');cl.className='st-btn';cl.textContent='Clear';cl.onclick=()=>{topo=dT();render();};ct.appendChild(cl);stagesEl.appendChild(ct);
+const lay=document.createElement('div');lay.className='topo-layout';stagesEl.appendChild(lay);
+const tools=document.createElement('div');tools.className='topo-panel';tools.innerHTML='<h4>🛠️ Tools</h4>';[{k:'select',i:'🖱️',n:'Select'},{k:'router',i:'🟥',n:'Router'},{k:'switch',i:'🟦',n:'Switch'},{k:'host',i:'🟩',n:'Host'},{k:'link',i:'🔗',n:'Link'},{k:'delete',i:'🗑️',n:'Delete'}].forEach(t=>{const e=document.createElement('div');e.className='topo-tool'+(topo.tool===t.k?' active':'');e.innerHTML='<span>'+t.i+'</span>'+t.n;e.onclick=()=>{topo.tool=t.k;topo.lf=null;topo.sel=null;render();};tools.appendChild(e);});lay.appendChild(tools);
+const cw=document.createElement('div');cw.className='topo-canvas-wrap';const cv=document.createElement('div');cv.className='topo-canvas';cw.appendChild(cv);const ns='http://www.w3.org/2000/svg';const sv=document.createElementNS(ns,'svg');sv.setAttribute('width','100%');sv.setAttribute('height','100%');cv.appendChild(sv);lay.appendChild(cw);
+cv.addEventListener('click',(e)=>{if(e.target!==cv)return;const rc=cv.getBoundingClientRect();const x=e.clientX-rc.left,y=e.clientY-rc.top;if(['router','switch','host'].includes(topo.tool)){const id=topo.ni++;const bs=topo.tool==='router'?'R':topo.tool==='switch'?'SW':'H';const cn=topo.devices.filter(d=>d.type===topo.tool).length+1;const dv={id,type:topo.tool,x,y,name:bs+cn};if(topo.tool==='host')dv.hostCount=10;topo.devices.push(dv);rebuild();render();if(topo.devices.length>=5)checkAch('topo',topo.devices.length);}});
+topo.devices.forEach(d=>{const e=document.createElement('div');e.className='topo-device '+d.type+(topo.sel===d.id?' selected':'')+(topo.lf===d.id?' linking':'');e.style.left=d.x+'px';e.style.top=d.y+'px';const ic=d.type==='router'?'🔴':d.type==='switch'?'🔵':'💻';e.innerHTML='<div class="icon">'+ic+'</div><div class="name">'+d.name+(d.type==='host'?' ('+(d.hostCount||10)+')':'')+'</div>';let dr=!1,sx=0,sy=0,dx=0,dy=0;e.addEventListener('mousedown',(ev)=>{ev.stopPropagation();if(topo.tool==='delete'||topo.tool==='link')return;dr=!0;sx=ev.clientX;sy=ev.clientY;dx=d.x;dy=d.y;});window.addEventListener('mousemove',(ev)=>{if(!dr)return;d.x=dx+(ev.clientX-sx);d.y=dy+(ev.clientY-sy);e.style.left=d.x+'px';e.style.top=d.y+'px';dl(sv);});window.addEventListener('mouseup',()=>{dr=!1;});e.addEventListener('click',(ev)=>{ev.stopPropagation();if(topo.tool==='delete'){topo.devices=topo.devices.filter(x=>x.id!==d.id);topo.links=topo.links.filter(l=>l.a!==d.id&&l.b!==d.id);rebuild();render();}else if(topo.tool==='link'){if(topo.lf===null){topo.lf=d.id;render();}else if(topo.lf===d.id){topo.lf=null;render();}else{const ex=topo.links.some(l=>(l.a===topo.lf&&l.b===d.id)||(l.b===topo.lf&&l.a===d.id));if(!ex)topo.links.push({id:topo.ni++,a:topo.lf,b:d.id});topo.lf=null;rebuild();render();}}else if(topo.tool==='select'){topo.sel=topo.sel===d.id?null:d.id;render();}});cv.appendChild(e);});
+function dl(s){while(s.firstChild)s.removeChild(s.firstChild);topo.links.forEach(lk=>{const a=topo.devices.find(d=>d.id===lk.a);const b=topo.devices.find(d=>d.id===lk.b);if(!a||!b)return;const ht=document.createElementNS(ns,'line');ht.setAttribute('x1',a.x);ht.setAttribute('y1',a.y);ht.setAttribute('x2',b.x);ht.setAttribute('y2',b.y);ht.setAttribute('class','lk-hit');ht.addEventListener('click',()=>{if(topo.tool==='delete'){topo.links=topo.links.filter(x=>x.id!==lk.id);rebuild();render();}});s.appendChild(ht);const ln=document.createElementNS(ns,'line');ln.setAttribute('x1',a.x);ln.setAttribute('y1',a.y);ln.setAttribute('x2',b.x);ln.setAttribute('y2',b.y);ln.setAttribute('class','lk'+(lk.subnetId?' assigned':' warn'));s.appendChild(ln);const sn=topo.subnets.find(x=>x.id===lk.subnetId);if(sn){const t=document.createElementNS(ns,'text');t.setAttribute('x',(a.x+b.x)/2);t.setAttribute('y',(a.y+b.y)/2-6);t.setAttribute('text-anchor','middle');t.textContent=sn.net+'/'+sn.p;s.appendChild(t);}});}
+dl(sv);
+const info=document.createElement('div');info.className='topo-panel';info.innerHTML='<h4>📊 Stats</h4>';const cnt={router:topo.devices.filter(d=>d.type==='router').length,switch:topo.devices.filter(d=>d.type==='switch').length,host:topo.devices.filter(d=>d.type==='host').length};let used=0,waste=0;topo.subnets.forEach(s=>{const sz=Math.pow(2,32-s.p);used+=sz;const u=s.p>=31?sz:sz-2;waste+=u-s.h;});const st=document.createElement('div');st.className='topo-stats';[['Routers',cnt.router],['Switches',cnt.switch],['Hosts',cnt.host],['Links',topo.links.length],['Used',used.toLocaleString()],['Waste',waste.toLocaleString()]].forEach(([l,v])=>{const x=document.createElement('div');x.className='topo-stat';x.innerHTML='<div>'+l+'</div><div class="v">'+v+'</div>';st.appendChild(x);});info.appendChild(st);
+if(topo.sel){const d=topo.devices.find(x=>x.id===topo.sel);if(d){const sl=document.createElement('div');sl.style.marginTop='12px';sl.innerHTML='<h4>Selected</h4>';const ni=document.createElement('input');ni.className='topo-input';ni.value=d.name;ni.onchange=()=>{d.name=ni.value||d.name;rebuild();render();};sl.appendChild(ni);if(d.type==='host'){const hl=document.createElement('div');hl.style.cssText='font-size:11px;color:var(--color-text-secondary);margin:6px 0 2px;';hl.textContent='Hosts';sl.appendChild(hl);const hi=document.createElement('input');hi.className='topo-input';hi.type='number';hi.value=d.hostCount||10;hi.onchange=()=>{d.hostCount=Math.max(1,parseInt(hi.value)||1);rebuild();render();};sl.appendChild(hi);}info.appendChild(sl);}}
+if(topo.subnets.length>0){const ss=document.createElement('div');ss.style.marginTop='12px';ss.innerHTML='<h4>📦 Subnets</h4>';topo.subnets.forEach(sn=>{const lk=topo.links.find(l=>l.subnetId===sn.id);const a=lk?topo.devices.find(d=>d.id===lk.a):null;const b=lk?topo.devices.find(d=>d.id===lk.b):null;const u=sn.p>=31?Math.pow(2,32-sn.p):Math.pow(2,32-sn.p)-2;const e=document.createElement('div');e.className='topo-subnet';e.innerHTML='<div class="net">'+sn.net+'/'+sn.p+'</div><div class="det">'+(a&&b?a.name+'-'+b.name:'?')+' · '+u+' usable</div>';ss.appendChild(e);});info.appendChild(ss);}
+const iss=[];if(topo.devices.length===0)iss.push('Add devices.');const oh=topo.devices.filter(d=>!topo.links.some(l=>l.a===d.id||l.b===d.id));if(oh.length>0)iss.push(oh.length+' unlinked.');const ua=topo.links.filter(l=>!l.subnetId);if(ua.length>0)iss.push(ua.length+' link(s) unallocated.');const v=document.createElement('div');v.className='topo-validate '+(iss.length===0?'ok':'bad');v.style.marginTop='12px';v.innerHTML=iss.length===0?'<b>✓ Valid</b>':'<b>⚠</b><ul style="margin:4px 0 0;padding-left:18px;">'+iss.map(i=>'<li>'+i+'</li>').join('')+'</ul>';info.appendChild(v);
+lay.appendChild(info);}
+
+let chR=null;
+function renderChallenge(){if(chR){chRun();return;}const c=document.createElement('div');c.className='st-card';c.innerHTML='<h3>⚡ Challenge Mode</h3><p style="font-size:13px;color:var(--color-text-secondary);">Hardest questions only.</p>';stagesEl.appendChild(c);const g=document.createElement('div');g.className='ch-tier-grid';Object.keys(TI).forEach(k=>{const t=TI[k];const tc=document.createElement('div');tc.className='ch-tier-card '+t.cls;tc.innerHTML='<div class="name">'+t.b+' '+t.n+(S.challengeBeaten[k]?' ✓':'')+'</div><div class="meta">'+(k==='vet'?'Hints on.':k==='exp'?'No hints.':'No mercy.')+'</div><div class="stats"><div>'+t.tot+' Qs</div><div>'+t.t+'s/Q</div><div>'+(t.th*100)+'%</div><div>'+t.m+'×</div></div>';tc.onclick=()=>{chR=stCh(k);render();};g.appendChild(tc);});stagesEl.appendChild(g);}
+function stCh(k){const t=TI[k];const its=shuf(pick(cMC,t.mP).map(x=>Object.assign({_t:'mc'},x)).concat(pick(cFill,t.fP).map(x=>Object.assign({_t:'fill'},x))));return{tk:k,t,its,i:0,cor:0,tl:t.t,tm:null};}
+function chRun(){const ban=document.createElement('div');ban.className='boss-banner';ban.style.background=chR.t.cls==='vet'?'#874C0A':chR.t.cls==='exp'?'#A32D2D':'#1F1B45';ban.innerHTML='<h3>'+chR.t.b+' '+chR.t.n+'</h3>';stagesEl.appendChild(ban);const c=document.createElement('div');c.className='st-card';stagesEl.appendChild(c);if(chR.i>=chR.its.length){chFin(c);return;}const it=chR.its[chR.i];chR.tl=chR.t.t;c.innerHTML='<div style="display:flex;justify-content:space-between;"><h3 style="margin:0;">Q '+(chR.i+1)+'/'+chR.its.length+'</h3><span class="st-timer" id="ct">⏱ '+chR.tl+'s</span></div>';const p=document.createElement('div');p.className='st-progress';p.innerHTML='<div style="width:'+((chR.i/chR.its.length)*100)+'%"></div>';c.appendChild(p);const q=document.createElement('p');q.style.cssText='font-size:15px;margin:4px 0;';q.textContent=it.q;c.appendChild(q);if(chR.t.h&&it._t==='fill'){const h=document.createElement('p');h.style.cssText='font-size:12px;color:var(--color-text-tertiary);';h.textContent='Hint: '+it.hint;c.appendChild(h);}const fb=document.createElement('div');fb.className='st-feedback';if(it._t==='mc'){const mc=document.createElement('div');mc.className='st-mc';it.opts.forEach((o,j)=>{const b=document.createElement('button');b.textContent=o;b.onclick=()=>aMC(j,b,mc,fb);mc.appendChild(b);});c.appendChild(mc);}else{const r=document.createElement('div');r.className='st-row';const ip=document.createElement('input');ip.className='st-input';const sb=document.createElement('button');sb.className='st-btn challenge '+chR.t.cls;sb.textContent='Submit';r.appendChild(ip);r.appendChild(sb);c.appendChild(r);function ck(){const v=ip.value.trim().toLowerCase().replace(/\s+/g,'');const a=String(it.a).toLowerCase().replace(/\s+/g,'');sb.disabled=!0;ip.disabled=!0;if(v===a){fb.className='st-feedback ok';fb.textContent='✓';chR.cor++;S.score+=20*chR.t.m;S.streak++;checkAch('streak');}else{fb.className='st-feedback bad';fb.textContent='✗ '+it.a;S.streak=0;}hud();clearInterval(chR.tm);setTimeout(()=>{chR.i++;render();},900);}sb.onclick=ck;ip.onkeydown=(e)=>{if(e.key==='Enter')ck();};setTimeout(()=>ip.focus(),50);}c.appendChild(fb);function aMC(j,btn,mc,fb){Array.from(mc.children).forEach(b=>b.disabled=!0);if(j===it.a){btn.classList.add('correct');chR.cor++;S.score+=15*chR.t.m;S.streak++;checkAch('streak');fb.className='st-feedback ok';fb.textContent='✓';}else{btn.classList.add('wrong');mc.children[it.a].classList.add('correct');S.streak=0;fb.className='st-feedback bad';fb.textContent='✗';}hud();clearInterval(chR.tm);setTimeout(()=>{chR.i++;render();},800);}const q2=document.createElement('button');q2.className='st-btn';q2.style.marginTop='12px';q2.textContent='Forfeit';q2.onclick=()=>{clearInterval(chR.tm);chR=null;S.streak=0;hud();render();};c.appendChild(q2);chR.tm=setInterval(()=>{chR.tl--;const x=document.getElementById('ct');if(x){x.textContent='⏱ '+chR.tl+'s';x.className='st-timer '+(chR.tl<=2?'crit':chR.tl<=4?'warn':'');}if(chR.tl<=0){clearInterval(chR.tm);S.streak=0;hud();setTimeout(()=>{chR.i++;render();},800);}},1000);}
+function chFin(c){const tot=chR.its.length;const pct=chR.cor/tot;const passed=pct>=chR.t.th;c.innerHTML='<h3>'+(passed?'🏆 Cleared':'💀 Failed')+'</h3><p>Score: <b>'+chR.cor+'/'+tot+'</b> ('+Math.round(pct*100)+'%)</p>';if(passed&&!S.challengeBeaten[chR.tk]){S.challengeBeaten[chR.tk]=!0;S.score+=50*chR.t.m;checkAch('tier',chR.tk);}const a=document.createElement('button');a.className='st-btn';a.textContent='Retry';a.onclick=()=>{chR=stCh(chR.tk);render();};c.appendChild(a);const b=document.createElement('button');b.className='st-btn primary';b.textContent='Back';b.style.marginLeft='8px';b.onclick=()=>{chR=null;render();};c.appendChild(b);hud();}
+
+let bs=null;
+function renderBoss(){const b=document.createElement('div');b.className='boss-banner';b.innerHTML='<h3>🐉 Final Boss</h3><p>3 in EACH category. Wrong = reset that bar.</p>';stagesEl.appendChild(b);if(S.bossDefeated){const w=document.createElement('div');w.className='st-card';w.style.textAlign='center';w.innerHTML='<div style="font-size:40px;">🏆</div><h3>Defeated</h3><p>Score: <b>'+S.score+'</b></p>';stagesEl.appendChild(w);const t=document.createElement('button');t.className='st-btn boss';t.textContent='Fight again';t.onclick=()=>{S.bossDefeated=!1;bs=null;S.flags.perfectBoss=!0;render();};stagesEl.appendChild(t);return;}const c=document.createElement('div');c.className='st-card';stagesEl.appendChild(c);if(!bs)bs={mc:0,fill:0,match:0};c.innerHTML='<h3>Pick weapon</h3><div class="hp-bars"></div>';const bars=c.querySelector('.hp-bars');['mc','fill','match'].forEach(k=>{const x=document.createElement('div');x.className='hp-bar'+(bs[k]>=3?' done':'');x.innerHTML='<div class="lab"><span>'+k.toUpperCase()+'</span><span>'+bs[k]+'/3</span></div><div class="track"><div class="fill" style="width:'+Math.min(100,(bs[k]/3)*100)+'%"></div></div>';bars.appendChild(x);});const r=document.createElement('div');r.className='st-row';[['mc','MC'],['fill','Fill'],['match','Match']].forEach(([k,l])=>{const x=document.createElement('button');x.className='st-btn';if(bs[k]>=3){x.disabled=!0;x.textContent='✓';}else{x.textContent='Attack: '+l;x.onclick=()=>aBoss(k);}r.appendChild(x);});c.appendChild(r);const ar=document.createElement('div');ar.style.marginTop='14px';ar.id='ba';c.appendChild(ar);if(bs.mc>=3&&bs.fill>=3&&bs.match>=3){S.bossDefeated=!0;S.score+=100;hud();checkAch('boss');render();}}
+function aBoss(t){const ar=document.getElementById('ba');ar.innerHTML='';if(t==='mc'){const it=pone(bMC);const q=document.createElement('p');q.style.cssText='font-size:15px;margin:10px 0;';q.textContent=it.q;ar.appendChild(q);const mc=document.createElement('div');mc.className='st-mc';it.opts.forEach((o,i)=>{const b=document.createElement('button');b.textContent=o;b.onclick=()=>{Array.from(mc.children).forEach(c=>c.disabled=!0);if(i===it.a){b.classList.add('correct');bs.mc++;S.score+=30;setTimeout(()=>render(),800);}else{b.classList.add('wrong');mc.children[it.a].classList.add('correct');bs.mc=0;S.streak=0;S.flags.perfectBoss=!1;setTimeout(()=>render(),1100);}hud();};mc.appendChild(b);});ar.appendChild(mc);}else if(t==='fill'){const it=pone(bFill);const q=document.createElement('p');q.style.cssText='font-size:15px;margin:10px 0;';q.textContent=it.q;ar.appendChild(q);const r=document.createElement('div');r.className='st-row';const ip=document.createElement('input');ip.className='st-input';const sb=document.createElement('button');sb.className='st-btn boss';sb.textContent='Submit';r.appendChild(ip);r.appendChild(sb);ar.appendChild(r);const fb=document.createElement('div');fb.className='st-feedback';ar.appendChild(fb);function ck(){const v=ip.value.trim().toLowerCase().replace(/\s+/g,'');const a=String(it.a).toLowerCase().replace(/\s+/g,'');sb.disabled=!0;ip.disabled=!0;if(v===a){fb.className='st-feedback ok';fb.textContent='✓';bs.fill++;S.score+=30;setTimeout(()=>render(),800);}else{fb.className='st-feedback bad';fb.textContent='✗ '+it.a;bs.fill=0;S.streak=0;S.flags.perfectBoss=!1;setTimeout(()=>render(),1300);}hud();}sb.onclick=ck;ip.onkeydown=(e)=>{if(e.key==='Enter')ck();};setTimeout(()=>ip.focus(),50);}else{const it=pone(bMatch);const q=document.createElement('p');q.style.cssText='font-size:15px;margin:10px 0;';q.textContent='Match '+it.left;ar.appendChild(q);const pl=document.createElement('div');pl.className='st-dz';pl.style.marginBottom='12px';const di=bMatch.filter(x=>x.right!==it.right).map(x=>x.right);shuf([it.right,di[0],di[1]]).filter(Boolean).forEach(rt=>{const c=document.createElement('div');c.className='st-chip';c.draggable=!0;c.textContent=rt;c.dataset.value=rt;c.addEventListener('dragstart',e=>e.dataTransfer.setData('text/plain',rt));pl.appendChild(c);});ar.appendChild(pl);const tr=document.createElement('div');tr.className='st-pair';const lf=document.createElement('div');lf.innerHTML='<span class="st-mono">'+it.left+'</span>';const dr=document.createElement('div');dr.className='st-dz';dr.addEventListener('dragover',e=>e.preventDefault());const fb=document.createElement('div');fb.className='st-feedback';dr.addEventListener('drop',e=>{e.preventDefault();const v=e.dataTransfer.getData('text/plain');if(v===it.right){fb.className='st-feedback ok';fb.textContent='✓';bs.match++;S.score+=30;setTimeout(()=>render(),800);}else{fb.className='st-feedback bad';fb.textContent='✗';bs.match=0;S.streak=0;S.flags.perfectBoss=!1;setTimeout(()=>render(),1200);}hud();});tr.appendChild(lf);tr.appendChild(dr);ar.appendChild(tr);ar.appendChild(fb);}}
+
+function renderAch(){const c=document.createElement('div');c.className='st-card';c.innerHTML='<h3 style="margin:0 0 4px;">🏅 Achievements</h3><p style="font-size:13px;color:var(--color-text-secondary);">Earn badges and bonus points.</p>';stagesEl.appendChild(c);const u=Object.keys(S.achievements).length;const pr=document.createElement('div');pr.className='ach-progress';pr.innerHTML='<div class="lab">Progress: <span style="color:var(--color-text-primary);">'+u+' / '+ACH.length+'</span> ('+Math.round((u/ACH.length)*100)+'%)</div><div class="bar"><div style="width:'+((u/ACH.length)*100)+'%"></div></div>';stagesEl.appendChild(pr);const ct={};ACH.forEach(a=>{if(!ct[a.c])ct[a.c]=[];ct[a.c].push(a);});Object.keys(ct).forEach(cat=>{const t=document.createElement('div');t.className='ach-section-title';t.textContent=cat;stagesEl.appendChild(t);const g=document.createElement('div');g.className='ach-grid';ct[cat].forEach(a=>{const ul=!!S.achievements[a.id];const x=document.createElement('div');x.className='ach-card '+(ul?'unlocked':'locked');x.innerHTML='<div class="ico">'+(ul?a.i:'🔒')+'</div><div class="name">'+a.n+'</div><div class="desc">'+a.d+'</div><span class="reward">+'+a.r+' pts</span>';g.appendChild(x);});stagesEl.appendChild(g);});}
+
+const TOUR=[
+{tg:'.st-title',ti:'Welcome to the Subnetting Trainer',bo:'Six missions, a sandbox, topology builder, challenge mode, and a final boss. About 30 seconds of orientation.'},
+{tg:'#hud-zone',ti:'Your HUD',bo:'Track score, streak, missions cleared, and achievements. Tier and boss badges appear here as you earn them.'},
+{tg:'#tabs',ti:'Tabs are your map',bo:'Missions M1-M6 unlock progressively. Sandbox, Topology, and Achievements stay open. Challenge unlocks after Mission 3, Boss after all six.'},
+{tg:'#stages',ti:'Three stages per mission',bo:'Study → Lesson → Mission. Read, practice hands-on (no scoring), then take the scored challenge. Mission stays locked until lesson is cleared.'},
+{tg:'#help-btn',ti:'Replay anytime',bo:'Click Help to restart this tour. You are ready - good luck!'}
+];
+
+function startTour(){let s=0;const ov=document.createElement('div');ov.className='onb-overlay';document.body.appendChild(ov);const sp=document.createElement('div');sp.className='onb-spotlight';document.body.appendChild(sp);const tt=document.createElement('div');tt.className='onb-tooltip';document.body.appendChild(tt);
+function show(){const x=TOUR[s];const el=document.querySelector(x.tg);if(!el){close();return;}const r=el.getBoundingClientRect();sp.style.left=(r.left-8)+'px';sp.style.top=(r.top-8)+'px';sp.style.width=(r.width+16)+'px';sp.style.height=(r.height+16)+'px';tt.innerHTML='<h4>'+x.ti+'</h4><p>'+x.bo+'</p><div class="nav"><div class="dots">'+TOUR.map((_,i)=>'<div class="dot'+(i===s?' active':'')+'"></div>').join('')+'</div><div><button class="st-btn" id="ts" style="margin-right:6px;">Skip</button>'+(s>0?'<button class="st-btn" id="tp" style="margin-right:6px;">Back</button>':'')+'<button class="st-btn primary" id="tn">'+(s===TOUR.length-1?'Done':'Next')+'</button></div></div>';let tp=r.bottom+16;if(tp+200>window.innerHeight)tp=Math.max(20,r.top-220);let tl=Math.max(20,Math.min(window.innerWidth-360,r.left));tt.style.top=tp+'px';tt.style.left=tl+'px';document.getElementById('ts').onclick=close;document.getElementById('tn').onclick=()=>{if(s===TOUR.length-1)close();else{s++;show();}};const pv=document.getElementById('tp');if(pv)pv.onclick=()=>{s--;show();};}
+function close(){S.onboardingDone=!0;ov.remove();sp.remove();tt.remove();}
+show();}
+
+document.getElementById('help-btn').onclick=startTour;
+
+render();
+setTimeout(()=>{if(!S.onboardingDone)startTour();},400);
+})();
+</script>
+</body>
+</html>
